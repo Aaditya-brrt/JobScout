@@ -60,7 +60,25 @@ def build_url() -> str:
                 "limit": 40,
                 "sortBy": "matchScore",
                 "direction": "forward",
-            }
+            },
+            # superjson meta: tells the server these fields are actually
+            # `undefined` rather than the literal `null` sent in the json
+            # block above (JSON has no way to represent `undefined` directly).
+            "meta": {
+                "values": {
+                    "filters.search": ["undefined"],
+                    "filters.companies": ["undefined"],
+                    "filters.minimumEducationLevel": ["undefined"],
+                    "filters.workArrangement": ["undefined"],
+                    "filters.startDate": ["undefined"],
+                    "filters.startDateEnd": ["undefined"],
+                    "filters.visaSponsorFilter": ["undefined"],
+                    "filters.hideShittyJobs": ["undefined"],
+                    "filters.topTierOnly": ["undefined"],
+                    "hasLogo": ["undefined"],
+                },
+                "v": 1,
+            },
         }
     }
     encoded = urllib.parse.quote(json.dumps(payload))
