@@ -32,11 +32,8 @@ locally, so a stray file doesn't get committed by accident.
 
 ## One-time setup
 
-### 1. Create the repo
-Push these files to a new GitHub repo (public is fine — no secrets live in
-the files themselves).
 
-### 2. Get your Runway session cookie
+### 1. Get your Runway session cookie
 1. Log into https://app.joinrunway.io in Chrome.
 2. Open DevTools → Network tab → Fetch/XHR filter.
 3. Reload `/explore`, click any request to `app.joinrunway.io`.
@@ -48,13 +45,13 @@ inactivity (commonly ~30 days, but background polling doesn't refresh it the
 way active browsing does). If the script starts failing, re-extract a fresh
 cookie the same way and update the secret.
 
-### 3. Get a Gmail App Password
+### 2. Get a Gmail App Password
 1. Go to https://myaccount.google.com/apppasswords (requires 2-Step
    Verification enabled on the account).
 2. Generate an app password for "Mail".
 3. Copy the 16-character password.
 
-### 4. Add GitHub Secrets
+### 3. Add GitHub Secrets
 In your repo: **Settings → Secrets and variables → Actions → New repository
 secret**. Add:
 - `RUNWAY_COOKIE` — the full cookie string from step 2
@@ -65,7 +62,7 @@ secret**. Add:
 other than `GMAIL_ADDRESS`, and update the workflow's `env:` block to pass it
 through.)
 
-### 5. Enable Actions and test
+### 4. Enable Actions and test
 1. Go to the **Actions** tab in your repo, enable workflows if prompted.
 2. Click into "Check Runway Jobs" → **Run workflow** to trigger it manually.
 3. Check the run logs. The **first run** just establishes a baseline (saves
