@@ -72,13 +72,19 @@ def fetch_jobs() -> list:
     req = urllib.request.Request(url)
     req.add_header("Cookie", RUNWAY_COOKIE)
     req.add_header("Accept", "*/*")
+    req.add_header("Referer", "https://app.joinrunway.io/explore")
     req.add_header(
         "User-Agent",
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
         "(KHTML, like Gecko) Chrome/125.0 Safari/537.36",
     )
-    with urllib.request.urlopen(req, timeout=30) as resp:
-        body = resp.read().decode("utf-8")
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            body = resp.read().decode("utf-8")
+    except urllib.error.HTTPError as e:
+        error_body = e.read().decode("utf-8", errors="replace")
+        print(f"HTTP {e.code} error from Runway. Response body:\n{error_body}")
+        raise
 
     data = json.loads(body)
     # Single-query batch response: a list with one element holding our result
