@@ -28,7 +28,13 @@ from email.message import EmailMessage
 RUNWAY_COOKIE = os.environ["RUNWAY_COOKIE"].strip()
 GMAIL_ADDRESS = os.environ["GMAIL_ADDRESS"].strip()
 GMAIL_APP_PASSWORD = os.environ["GMAIL_APP_PASSWORD"].strip()
-TO_EMAIL = os.environ.get("TO_EMAIL", GMAIL_ADDRESS).strip()
+# TO_EMAIL supports one or more comma-separated addresses, e.g.
+# "alice@example.com, bob@example.com". Defaults to GMAIL_ADDRESS if unset.
+TO_EMAILS = [
+    addr.strip()
+    for addr in os.environ.get("TO_EMAIL", GMAIL_ADDRESS).split(",")
+    if addr.strip()
+]
 MIN_MATCH_SCORE = int(os.environ.get("MIN_MATCH_SCORE", "80"))
 
 SEEN_IDS_FILE = "seen_ids.json"
@@ -125,7 +131,7 @@ def send_email(new_jobs: list) -> None:
     msg = EmailMessage()
     msg["Subject"] = f"{len(new_jobs)} new high-match internship(s) on Runway"
     msg["From"] = GMAIL_ADDRESS
-    msg["To"] = TO_EMAIL
+    msg["To"] = ", ".join(TO_EMAILS)
 
     lines = []
     for job in new_jobs:

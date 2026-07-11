@@ -2,8 +2,8 @@ name: Check Runway Jobs
 
 on:
   schedule:
-    - cron: "*/5 * * * *"
-  workflow_dispatch: {}
+    - cron: "*/5 * * * *"  # best-effort backup only - not relied on for timing
+  workflow_dispatch: {}    # triggered externally via GitHub API for reliable timing
 
 permissions:
   contents: write
@@ -23,13 +23,15 @@ jobs:
           RUNWAY_COOKIE: ${{ secrets.RUNWAY_COOKIE }}
           GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          TO_EMAIL: ${{ secrets.TO_EMAIL }}
           MIN_MATCH_SCORE: "80"
         run: python check_jobs.py
 
-      - name: Commit updated seen_ids.json
+      - name: Commit updated state
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add seen_ids.json
-          git diff --quiet --cached || git commit -m "Update seen job ids [skip ci]"
+          date -u +"%Y-%m-%dT%H:%M:%SZ" > last_run.txt
+          git add seen_ids.json last_run.txt
+          git diff --quiet --cached || git commit -m "Update state [skip ci]"
           git push
