@@ -112,7 +112,18 @@ def fetch_jobs() -> list:
 
     data = json.loads(body)
     # Single-query batch response: a list with one element holding our result
-    return data[0]["result"]["data"]["json"]["jobs"]
+    jobs = data[0]["result"]["data"]["json"]["jobs"]
+
+    # An expired RUNWAY_COOKIE does NOT error - Runway serves the endpoint
+    # anonymously and every job comes back with matchScore 0. Without this
+    # check the run stays green forever while silently matching nothing.
+    if jobs and not any(j.get("matchScore") for j in jobs):
+        raise RuntimeError(
+            f"All {len(jobs)} jobs returned matchScore 0 - RUNWAY_COOKIE is "
+            "almost certainly expired. Re-extract it from DevTools and update "
+            "the RUNWAY_COOKIE GitHub Secret."
+        )
+    return jobs
 
 
 def load_seen_ids() -> set:
@@ -146,7 +157,13 @@ def send_email(new_jobs: list) -> None:
 
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
         smtp.login(GMAIL_ADDRESS, GMAIL_APP_PASSWORD)
-        smtp.send_message(msg)
+        refused = smtp.send_message(msg)
+
+    # send_message returns a dict of recipients the server refused; an empty
+    # dict means Gmail accepted delivery for everyone on TO_EMAILS.
+    if refused:
+        raise RuntimeError(f"SMTP refused recipient(s): {refused}")
+    print(f"Email accepted by Gmail for: {', '.join(TO_EMAILS)}")
 
 
 def main() -> None:
